@@ -1,6 +1,7 @@
 import 'package:bill_tracker_2/model/transaction.dart';
+import 'package:bill_tracker_2/widgets/new_transaction.dart';
+import 'package:bill_tracker_2/widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 void main() => runApp(MyApp());
 
@@ -20,7 +21,7 @@ class BillPage extends StatefulWidget {
 }
 
 class _BillPageState extends State<BillPage> {
-  List<Transaction> userTranscation = [
+  List<Transaction> _userTranscation = [
     Transaction(title: "Glass", amount: 100.00, date: DateTime.now()),
     Transaction(title: "Shirts", amount: 150.00, date: DateTime.now()),
     Transaction(title: "Shoes", amount: 500.00, date: DateTime.now())
@@ -29,12 +30,20 @@ class _BillPageState extends State<BillPage> {
   String title;
   double amount;
 
-  void addProduct(String title, double amount) {
+  void _addProduct(String title, double amount) {
     final newTrans =
         new Transaction(title: title, amount: amount, date: DateTime.now());
     setState(() {
-      userTranscation.add(newTrans);
+      _userTranscation.add(newTrans);
     });
+  }
+
+  void _showAddTransaction(BuildContext context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (ctx) {
+          return NewTransaction(_addProduct);
+        });
   }
 
   @override
@@ -52,93 +61,13 @@ class _BillPageState extends State<BillPage> {
                 child: Text("Chart"),
               ),
             ),
-            Card(
-              child: Container(
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  children: <Widget>[
-                    TextField(
-                      decoration:
-                          InputDecoration(labelText: "Enter Product Name"),
-                      onChanged: (value) {
-                        title = value;
-                      },
-                    ),
-                    TextField(
-                      decoration:
-                          InputDecoration(labelText: "Enter Product Price"),
-                      onChanged: (value) {
-                        amount = double.parse(value);
-                      },
-                      keyboardType: TextInputType.number,
-                    ),
-                    RaisedButton(
-                      child: Text(
-                        "Add Product",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      onPressed: () {
-                        addProduct(title, amount);
-                      },
-                      color: Colors.blueGrey,
-                    )
-                  ],
-                ),
-              ),
-            ),
-            Column(
-              children: userTranscation.map((tx) {
-                return Card(
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        child: Text(
-                          "\$" + tx.amount.toString(),
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.green,
-                            width: 2,
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        margin: EdgeInsets.all(5),
-                        padding: EdgeInsets.all(5),
-                      ),
-                      SizedBox(
-                        width: 15,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            tx.title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          Text(
-                            DateFormat.yMMMEd().add_jms().format(tx.date),
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 18,
-                            ),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                );
-              }).toList(),
-            )
+            TransactionList(_userTranscation),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => _showAddTransaction(context),
       ),
     );
   }
