@@ -20,7 +20,7 @@ class _NewTransactionState extends State<NewTransaction> {
         double amount = double.parse(amountController.text);
 
         widget.addTx(title, amount);
-        Navigator.pop(contex
+        Navigator.pop(context);
       }
     } else {
       return;
