@@ -49,7 +49,7 @@ class _NewTransactionState extends State<NewTransaction> {
                 style: TextStyle(color: Colors.white),
               ),
               onPressed: _submitData,
-              color: Colors.blueGrey,
+              color: Theme.of(context).accentColor,
             )
           ],
         ),

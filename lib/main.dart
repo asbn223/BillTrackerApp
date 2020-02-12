@@ -1,4 +1,5 @@
 import 'package:bill_tracker_2/model/transaction.dart';
+import 'package:bill_tracker_2/widgets/chart.dart';
 import 'package:bill_tracker_2/widgets/new_transaction.dart';
 import 'package:bill_tracker_2/widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Bill Tracker",
       home: BillPage(),
+      theme: ThemeData(
+        primaryColor: Colors.orange,
+        accentColor: Colors.orange,
+        fontFamily: "font1",
+        textTheme: TextTheme(title: TextStyle(fontFamily: "font2", fontSize: 18, fontWeight: FontWeight.bold),),
+        appBarTheme: AppBarTheme(textTheme: TextTheme(title: TextStyle(fontFamily: "font1", fontSize: 20, fontWeight: FontWeight.bold)))
+      ),
     );
   }
 }
@@ -26,6 +34,12 @@ class _BillPageState extends State<BillPage> {
     Transaction(title: "Shirts", amount: 150.00, date: DateTime.now()),
     Transaction(title: "Shoes", amount: 500.00, date: DateTime.now())
   ];
+
+  List<Transaction> get _recentTransactions{
+    return _userTranscation.where((tx){
+      return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7),),);
+    }).toList();
+  }
 
   String title;
   double amount;
@@ -51,16 +65,20 @@ class _BillPageState extends State<BillPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Bill Tracker"),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
+            onPressed: () => _showAddTransaction(context),
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            Container(
-              width: double.infinity,
-              child: Card(
-                child: Text("Chart"),
-              ),
-            ),
+            Chart( _recentTransactions),
             TransactionList(_userTranscation),
           ],
         ),
