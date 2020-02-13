@@ -13,12 +13,19 @@ class MyApp extends StatelessWidget {
       title: "Bill Tracker",
       home: BillPage(),
       theme: ThemeData(
-        primaryColor: Colors.orange,
-        accentColor: Colors.orange,
-        fontFamily: "font1",
-        textTheme: TextTheme(title: TextStyle(fontFamily: "font2", fontSize: 18, fontWeight: FontWeight.bold),),
-        appBarTheme: AppBarTheme(textTheme: TextTheme(title: TextStyle(fontFamily: "font1", fontSize: 20, fontWeight: FontWeight.bold)))
-      ),
+          primaryColor: Colors.orange,
+          accentColor: Colors.orange,
+          fontFamily: "font1",
+          textTheme: TextTheme(
+            title: TextStyle(
+                fontFamily: "font2", fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          appBarTheme: AppBarTheme(
+              textTheme: TextTheme(
+                  title: TextStyle(
+                      fontFamily: "font1",
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold)))),
     );
   }
 }
@@ -30,23 +37,26 @@ class BillPage extends StatefulWidget {
 
 class _BillPageState extends State<BillPage> {
   List<Transaction> _userTranscation = [
-    Transaction(title: "Glass", amount: 100.00, date: DateTime.now()),
-    Transaction(title: "Shirts", amount: 150.00, date: DateTime.now()),
-    Transaction(title: "Shoes", amount: 500.00, date: DateTime.now())
+//    Transaction(title: "Glass", amount: 100.00, date: DateTime.now()),
+//    Transaction(title: "Shirts", amount: 150.00, date: DateTime.now()),
+//    Transaction(title: "Shoes", amount: 500.00, date: DateTime.now())
   ];
 
-  List<Transaction> get _recentTransactions{
-    return _userTranscation.where((tx){
-      return tx.date.isAfter(DateTime.now().subtract(Duration(days: 7),),);
+  List<Transaction> get _recentTransactions {
+    return _userTranscation.where((tx) {
+      return tx.date.isAfter(
+        DateTime.now().subtract(
+          Duration(days: 7),
+        ),
+      );
     }).toList();
   }
 
   String title;
   double amount;
 
-  void _addProduct(String title, double amount) {
-    final newTrans =
-        new Transaction(title: title, amount: amount, date: DateTime.now());
+  void _addProduct(String title, double amount, DateTime date2) {
+    final newTrans = new Transaction(title: title, amount: amount, date: date2);
     setState(() {
       _userTranscation.add(newTrans);
     });
@@ -78,7 +88,7 @@ class _BillPageState extends State<BillPage> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            Chart( _recentTransactions),
+            Chart(_recentTransactions),
             TransactionList(_userTranscation),
           ],
         ),
