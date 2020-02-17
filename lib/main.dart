@@ -1,8 +1,13 @@
-import 'package:bill_tracker_2/model/transaction.dart';
-import 'package:bill_tracker_2/widgets/chart.dart';
-import 'package:bill_tracker_2/widgets/new_transaction.dart';
-import 'package:bill_tracker_2/widgets/transaction_list.dart';
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+
+import 'model/transaction.dart';
+import 'widgets/chart.dart';
+import 'widgets/new_transaction.dart';
+import 'widgets/transaction_list.dart';
 import 'package:flutter/material.dart';
+//import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -54,11 +59,25 @@ class _BillPageState extends State<BillPage> {
 
   String title;
   double amount;
+  bool _showChart = false;
 
   void _addProduct(String title, double amount, DateTime date2) {
-    final newTrans = new Transaction(title: title, amount: amount, date: date2);
+    final newTrans = new Transaction(
+      title: title,
+      amount: amount,
+      date: date2,
+      id: DateTime.now().toString(),
+    );
     setState(() {
       _userTranscation.add(newTrans);
+    });
+  }
+
+  void _deleteTransaction(String id) {
+    setState(() {
+      _userTranscation.removeWhere((tx) {
+        return tx.id == id;
+      });
     });
   }
 
@@ -72,31 +91,99 @@ class _BillPageState extends State<BillPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Bill Tracker"),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.add,
-              color: Colors.white,
+    final mediaQuery = MediaQuery.of(context);
+    bool isLandScape = mediaQuery.orientation == Orientation.landscape;
+
+    final PreferredSizeWidget appBar = Platform.isIOS
+        ? CupertinoNavigationBar(
+            middle: Text("Track your bills !"),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                GestureDetector(
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.white,
+                  ),
+                  onTap: () => _showAddTransaction(context),
+                )
+              ],
             ),
-            onPressed: () => _showAddTransaction(context),
           )
+        : AppBar(
+            title: Text("Track your bills !"),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.add),
+                color: Colors.white,
+                onPressed: () => _showAddTransaction(context),
+              ),
+            ],
+          );
+
+    final txListWidget = Container(
+        height: (mediaQuery.size.height * 0.7) -
+            appBar.preferredSize.height -
+            mediaQuery.padding.top,
+        child: TransactionList(_userTranscation, _deleteTransaction));
+
+    final pageBody = SingleChildScrollView(
+      child: Column(
+        //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          if (isLandScape) //sdk updated in pubspec.yaml as 2.2.3
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  "Show Chart",
+                  style: Theme.of(context).textTheme.title.copyWith(
+                      color: Theme.of(context).accentColor,
+                      fontFamily: "font1",
+                      fontSize: 25),
+                ),
+                Switch.adaptive(
+                  activeColor: Theme.of(context).accentColor,
+                  value: _showChart,
+                  onChanged: (val) {
+                    setState(() {
+                      _showChart = val;
+                    });
+                  },
+                )
+              ],
+            ),
+          if (!isLandScape)
+            Container(
+              height: (mediaQuery.size.height * 0.4) -
+                  appBar.preferredSize.height -
+                  mediaQuery.padding.top,
+              child: Chart(_recentTransactions),
+            ),
+          if (!isLandScape) txListWidget,
+          if (isLandScape)
+            _showChart
+                ? Container(
+                    height: (mediaQuery.size.height * 0.7) -
+                        appBar.preferredSize.height -
+                        mediaQuery.padding.top,
+                    child: Chart(_recentTransactions))
+                : txListWidget,
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Chart(_recentTransactions),
-            TransactionList(_userTranscation),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => _showAddTransaction(context),
-      ),
     );
+
+    return Platform.isIOS
+        ? CupertinoPageScaffold(child: pageBody)
+        : Scaffold(
+            appBar: appBar,
+            body: pageBody,
+            floatingActionButton: Platform.isIOS
+                ? Container()
+                : FloatingActionButton(
+                    child: Icon(Icons.add),
+                    onPressed: () => _showAddTransaction(context),
+                  ),
+          );
   }
 }
